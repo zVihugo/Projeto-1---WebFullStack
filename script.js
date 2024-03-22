@@ -1,63 +1,109 @@
 let input = document.querySelector('input')
-    let button = document.querySelector('button')
-    
-    function procurar(){
-        fetch("https://dragonball-api.com/api/characters").then(response => response.json()).then(data =>{
-            console.log(data)
-            let ul = document.querySelector('ul')
-            ul.innerHTML = ""
-            let li = document.createElement('li')
-            let img = document.createElement('img')
-            let des = document.createElement('li')
-            for(i in data.items){
-                if(data.items[i].name.toLowerCase() == input.value.toLowerCase()){
-                    img.src = data.items[i].image
-                    li.innerHTML = data.items[i].name
-                    des.innerHTML = data.items[i].description
-                    li.appendChild(img)
-                    ul.appendChild(li)
-                    ul.appendChild(des)
-                    input.value = ""
-                }else if(input.value.toLowerCase() == "todos"){
-                    for(l in data.items){
-                        let li = document.createElement('li')
-                        let img = document.createElement('img')
-                        let des = document.createElement('li')
-                        img.src = data.items[l].image
-                        li.innerHTML = data.items[l].name
-                        des.innerHTML = data.items[l].description
-                        li.appendChild(img)
-                        ul.appendChild(li)
-                        ul.appendChild(des)
-                        input.value = ""
-                    }
-                }
-            }
-            if(ul.innerHTML == ""){
-                if(input.value == ""){
-                    img.src = "images.jpg"
-                    li.innerHTML = "Não digitou nada né"
-                    des.innerHTML = "Parece que alguem aqui ta querendo me dificultar"
-                    li.appendChild(img)
-                    ul.appendChild(li)
-                    ul.appendChild(des)
-                }
-                else{
-                    img.src = "download.png"
-                    li.innerHTML = "Personagem não encontrado"
-                    des.innerHTML = "Te orienta fiote, não tem esse personagem aqui não"
-                    li.appendChild(img)
-                    ul.appendChild(li)
-                    ul.appendChild(des)
-                }
-            }
-        })
+let button = document.querySelector('button')
+let button2 = document.getElementById('botao')
+
+
+function procurar(){
+    let promises = [];
+    for(let page = 1; page <= 7; page++){
+        promises.push(fetch("https://dragonball-api.com/api/characters?page=" + page).then((response) => response.json()));
     }
 
-    button.addEventListener('click', procurar)
+    Promise.all(promises).then((results) => {
+        let Personagens = [];
+        results.forEach((data) => {
+            Personagens = Personagens.concat(data.items);
+        });
 
-    input.addEventListener('keyup', function(event){
-        if(event.keyCode === 13){
-            procurar()
+        console.log(Personagens); 
+
+        let ul = document.querySelector('ul')
+        ul.innerHTML = ""
+        let li = document.createElement('li')
+        let img = document.createElement('img')
+        let des = document.createElement('li')
+        for(i in Personagens){
+            if(Personagens[i].name.toLowerCase() == input.value.trim().toLowerCase()){
+                img.src = Personagens[i].image
+                li.innerHTML = Personagens[i].name
+                des.innerHTML = Personagens[i].description
+                li.appendChild(img)
+                ul.appendChild(li)
+                ul.appendChild(des)
+                input.value = ""
+            }
         }
-    })
+        if(ul.innerHTML == ""){
+            if(input.value == ""){
+                img.src = "images.jpg"
+                li.innerHTML = "Digita o nome meu rei"
+                des.innerHTML = "Parece que alguem aqui ta querendo me dificultar"
+                li.appendChild(img)
+                ul.appendChild(li)
+                ul.appendChild(des)
+            }
+            else{
+                img.src = "download.png"
+                li.innerHTML = "Personagem não encontrado"
+                des.innerHTML = "Te orienta fiote, não tem esse personagem aqui não"
+                li.appendChild(img)
+                ul.appendChild(li)
+                ul.appendChild(des)
+            }
+        }
+        if(input.value.trim().toLowerCase() == "todos"){ 
+            ul.innerHTML = ""
+            for(i in Personagens){
+                let li = document.createElement('li')
+                let img = document.createElement('img')
+                let des = document.createElement('li')
+                img.src = Personagens[i].image
+                li.innerHTML = Personagens[i].name
+                des.innerHTML = Personagens[i].description
+                li.appendChild(img)
+                ul.appendChild(li)
+                ul.appendChild(des)
+            }
+            input.value=""
+        }
+    });
+}
+
+function gerarAleatorio(){
+    let promises = [];
+    for(let page = 1; page <= 7; page++){
+        promises.push(fetch("https://dragonball-api.com/api/characters?page=" + page).then((response) => response.json()));
+    }
+
+    Promise.all(promises).then((results) => {
+        let Personagens = [];
+        results.forEach((data) => {
+            Personagens = Personagens.concat(data.items);
+        });
+
+        console.log(Personagens); 
+
+        let ul = document.querySelector('ul')
+        ul.innerHTML = ""
+        let li = document.createElement('li')
+        let img = document.createElement('img')
+        let des = document.createElement('li')
+        let aleatorio = Math.floor(Math.random() * Personagens.length)
+        img.src = Personagens[aleatorio].image
+        li.innerHTML = Personagens[aleatorio].name
+        des.innerHTML = Personagens[aleatorio].description
+        li.appendChild(img)
+        ul.appendChild(li)
+        ul.appendChild(des)
+    });
+}
+
+button2.addEventListener('click', gerarAleatorio)
+
+button.addEventListener('click', procurar)
+
+input.addEventListener('keyup', function(e){
+    if(e.key === "Enter"){
+        procurar()
+    }
+})
